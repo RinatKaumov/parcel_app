@@ -10,47 +10,63 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          caches: false
           go-version: '1.23.4'
+
+      # Кэширование зависимостей Go для ускорения сборки
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Build
         run: go build -v ./...
 
   tests:
-    # Задание "tests" зависит от задания "build" и будет выполнено после него
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.4'
 
       - name: Test
         run: go test -v ./...
 
-  # Задание проверяет наличие в коде состояния гонки
   tests-race:
-    # Задание "tests-race" зависит от задания "build" и будет выполнено после него
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
 
-      - name: Test
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.4'
+
+      - name: Test (race)
         run: go test -race -v ./...
 
-  # Задание проверяет код на соответствие стилю и отсутствие логических ошибок
   lint:
-    # Задание "lint" зависит от заданий "tests" и "tests-race" и будет выполнено после них
     needs: [tests, tests-race]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-      # Используется действие "golangci/golangci-lint-action@v3", которое запускает линтер. Он проверит код на соответствие стилю и отсутствие логических ошибок
-      - uses: golangci/golangci-lint-action@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.4'
+
+      # Линтинг с использованием golangci-lint
+      - name: Run lint
+        uses: golangci/golangci-lint-action@v3
