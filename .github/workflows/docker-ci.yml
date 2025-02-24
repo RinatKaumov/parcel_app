@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.23'  # укажи свою версию Go
+          go-version: '1.23'
 
       - name: Установить зависимости
         run: go mod tidy
@@ -53,3 +53,5 @@ jobs:
           docker push my-dockerhub-username/my-app:$GITHUB_SHA
           docker tag my-dockerhub-username/my-app:$GITHUB_SHA my-dockerhub-username/my-app:${GITHUB_REF#refs/tags/}
           docker push my-dockerhub-username/my-app:${GITHUB_REF#refs/tags/}
+          docker tag my-dockerhub-username/my-app:$GITHUB_SHA my-dockerhub-username/my-app:latest
+          docker push my-dockerhub-username/my-app:latest
