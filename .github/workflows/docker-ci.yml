@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.23'
+          go-version: '1.23'  # укажи свою версию Go
 
       - name: Установить зависимости
         run: go mod tidy
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint-and-test  # этот job будет зависеть от первого job'а
 
-    if: startsWith(github.ref, 'refs/tags/')  # запускается только для тегов
+    if: startsWith(github.ref, 'refs/tags/')  # выполняется только при пуше тега
 
     steps:
       - name: Check out code
@@ -44,6 +44,10 @@ jobs:
       - name: Логин в DockerHub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Debug GitHub Ref
+        run: |
+          echo "GitHub Ref: ${{ github.ref }}"  # выводим ссылку на референс (тег или ветку)
+
       - name: Сборка Docker-образа
         run: |
           docker build -t my-dockerhub-username/my-app:$GITHUB_SHA .
@@ -51,8 +55,8 @@ jobs:
       - name: Публикация Docker-образа
         run: |
           docker push my-dockerhub-username/my-app:$GITHUB_SHA
-          IMAGE_TAG="${GITHUB_REF#refs/tags/}"  # Удаляем префикс refs/tags/
+          IMAGE_TAG="${GITHUB_REF#refs/tags/}"
           docker tag my-dockerhub-username/my-app:$GITHUB_SHA my-dockerhub-username/my-app:$IMAGE_TAG
           docker push my-dockerhub-username/my-app:$IMAGE_TAG
           docker tag my-dockerhub-username/my-app:$GITHUB_SHA my-dockerhub-username/my-app:latest
-          docker push my-dockerhub-
+          docker push my-dockerhub-username/my-app:latest
