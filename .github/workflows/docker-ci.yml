@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-${{ runner.os }}-${{ github.sha }}
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-go-
 
