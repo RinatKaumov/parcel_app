@@ -1,33 +1,38 @@
-name: Go
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches:
+      - main
+    tags:
+      - 'v*'  # реагирует на теги, например v1.0.0
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v2
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v2
         with:
-          go-version: '1.21'
+          go-version: '1.18'
 
-      # Кэширование зависимостей Go
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+      - name: Install dependencies
+        run: go mod tidy
 
-      - name: Build
-        run: go build -v ./...
+      - name: Run tests
+        run: go test ./...
 
-      - name: Test
-        run: go test -v ./...
+      - name: Build Docker image
+        run: |
+          docker build -t my-app:$GITHUB_SHA .
+
+      - name: Push Docker image to DockerHub
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker tag my-app:$GITHUB_SHA my-dockerhub-username/my-app:$GITHUB_SHA
+          docker push my-dockerhub-username/my-app:$GITHUB_SHA
