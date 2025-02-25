@@ -51,7 +51,7 @@ jobs:
 
       - name: Сборка Docker-образа
         run: |
-          docker build -t my-dockerhub-username/my-app:$GITHUB_SHA .
+          docker build -t pentanir/parcel_app:$GITHUB_SHA .
 
       - name: Публикация Docker-образа
         run: |
