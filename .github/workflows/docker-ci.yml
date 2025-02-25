@@ -42,11 +42,12 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Логин в DockerHub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Debug GitHub Ref
         run: |
-          echo "GitHub Ref: ${{ github.ref }}"  # выводим ссылку на референс (тег или ветку)
+          echo "GitHub Ref: ${{ github.ref }}"
 
       - name: Сборка Docker-образа
         run: |
@@ -54,9 +55,9 @@ jobs:
 
       - name: Публикация Docker-образа
         run: |
-          docker push my-dockerhub-username/my-app:$GITHUB_SHA
+          docker push pentanir/my-app:$GITHUB_SHA
           IMAGE_TAG="${GITHUB_REF#refs/tags/}"
-          docker tag my-dockerhub-username/my-app:$GITHUB_SHA my-dockerhub-username/my-app:$IMAGE_TAG
-          docker push my-dockerhub-username/my-app:$IMAGE_TAG
-          docker tag my-dockerhub-username/my-app:$GITHUB_SHA my-dockerhub-username/my-app:latest
-          docker push my-dockerhub-username/my-app:latest
+          docker tag pentanir/my-app:$GITHUB_SHA pentanir/my-app:$IMAGE_TAG
+          docker push pentanir/my-app:$IMAGE_TAG
+          docker tag pentanir/my-app:$GITHUB_SHA pentanir/my-app:latest
+          docker push pentanir/my-app:latest
